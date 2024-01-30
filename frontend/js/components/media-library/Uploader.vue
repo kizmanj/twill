@@ -90,11 +90,13 @@
                 },
                 region: this.uploaderConfig.endpointRegion,
                 bucket: this.uploaderConfig.endpointBucket,
-                acl: this.uploaderConfig.acl
+                acl: this.uploaderConfig.acl,
+                sessionToken: this.uploaderConfig.sessionToken
               },
               request: {
                 endpoint: this.uploaderConfig.endpoint,
-                accessKey: this.uploaderConfig.accessKey
+                accessKey: this.uploaderConfig.accessKey,
+                sessionToken: this.uploaderConfig.sessionToken
               },
               signature: {
                 endpoint: this.uploaderConfig.signatureEndpoint,
@@ -102,7 +104,14 @@
                 customHeaders: {
                   'X-CSRF-TOKEN': this.uploaderConfig.csrfToken
                 },
-                sessionToken: this.uploaderConfig.sessionToken
+                credentialsProvider: {
+                  get: function() {
+                    return {
+                      accessKey: this.uploaderConfig.accessKey,
+                      sessionToken: this.uploaderConfig.sessionToken
+                    };
+                  }
+                }
               },
               uploadSuccess: {
                 endpoint: this.uploaderConfig.successEndpoint,
