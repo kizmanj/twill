@@ -63,15 +63,18 @@ class MediasUploaderConfig
         ];
 
         $accessKey = $this->config->get('filesystems.disks.' . $libraryDisk . '.key', 'none');
-        $sessionToken = $this->config->get('filesystems.disks.' . $libraryDisk . '.token', 'none');;
+        $sessionToken = null;
+        $sessionTokenExpiration = null;
         if ($endpointType === 's3') {
             $diskSettingCreds = $this->config->get('filesystems.disks.' . $libraryDisk . '.credentials');
             if (!empty($diskSettingCreds) && is_object($diskSettingCreds) && method_exists($diskSettingCreds, 'getAccessKeyId')) {
                 $accessKey = $diskSettingCreds->getAccessKeyId();
                 $sessionToken = $diskSettingCreds->getSecurityToken();
+                $sessionTokenExpiration = $diskSettingCreds->getSecurityToken();
             } else if (!empty($diskSettingCreds) && is_array($diskSettingCreds)) {
                 $accessKey = $diskSettingCreds['key'];
                 $sessionToken = $diskSettingCreds['token'];
+                $sessionTokenExpiration = $diskSettingCreds['expiration'];
             }
         }
 
@@ -85,6 +88,7 @@ class MediasUploaderConfig
             'endpointRoot' => $endpointType === 'local' ? '' : $this->config->get('filesystems.disks.' . $libraryDisk . '.root', ''),
             'accessKey' => $accessKey,
             'sessionToken' => $sessionToken,
+            'sessionTokenExpiration' => $sessionTokenExpiration,
             'csrfToken' => $this->sessionStore->token(),
             'acl' => $this->config->get('twill.media_library.acl'),
             'filesizeLimit' => $this->config->get('twill.media_library.filesize_limit'),

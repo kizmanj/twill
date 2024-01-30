@@ -100,8 +100,8 @@
               },
               credentials: {
                 accessKey: this.uploaderConfig.accessKey,
-                secretKey: null,
-                expiration: null,
+                secretKey: this.uploaderConfig.sessionToken ? "dummy-secret-key" : null, // server side won't share it
+                expiration: this.uploaderConfig.sessionTokenExpiration,
                 sessionToken: this.uploaderConfig.sessionToken
               },
               signature: {
@@ -109,14 +109,6 @@
                 version: 4,
                 customHeaders: {
                   'X-CSRF-TOKEN': this.uploaderConfig.csrfToken
-                },
-                credentialsProvider: {
-                  get: function() {
-                    return {
-                      accessKey: this.uploaderConfig.accessKey,
-                      sessionToken: this.uploaderConfig.sessionToken
-                    };
-                  }
                 }
               },
               uploadSuccess: {
