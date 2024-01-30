@@ -94,7 +94,8 @@
               },
               request: {
                 endpoint: this.uploaderConfig.endpoint,
-                accessKey: this.uploaderConfig.accessKey
+                accessKey: this.uploaderConfig.accessKey,
+                sessionToken: this.uploaderConfig.sessionToken
               },
               signature: {
                 endpoint: this.uploaderConfig.signatureEndpoint,

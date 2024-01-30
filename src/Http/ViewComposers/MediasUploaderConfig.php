@@ -62,6 +62,19 @@ class MediasUploaderConfig
             'azure' => $this->urlGenerator->route(config('twill.admin_route_name_prefix') . 'media-library.sign-azure-upload'),
         ];
 
+        $accessKey = $this->config->get('filesystems.disks.' . $libraryDisk . '.key', 'none');
+        $sessionToken = $this->config->get('filesystems.disks.' . $libraryDisk . '.token', 'none');;
+        if ($endpointType === 's3') {
+            $diskSettingCreds = $this->config->get('filesystems.disks.' . $libraryDisk . '.credentials');
+            if (!empty($diskSettingCreds) && is_object($diskSettingCreds) && method_exists($diskSettingCreds, 'getAccessKeyId')) {
+                $accessKey = $diskSettingCreds->getAccessKeyId();
+                $sessionToken = $diskSettingCreds->getSecurityToken();
+            } else if (!empty($diskSettingCreds) && is_array($diskSettingCreds)) {
+                $accessKey = $diskSettingCreds['key'];
+                $sessionToken = $diskSettingCreds['token'];
+            }
+        }
+
         $mediasUploaderConfig = [
             'endpointType' => $endpointType,
             'endpoint' => $endpointByType[$endpointType](),
@@ -70,7 +83,8 @@ class MediasUploaderConfig
             'endpointBucket' => $this->config->get('filesystems.disks.' . $libraryDisk . '.bucket', 'none'),
             'endpointRegion' => $this->config->get('filesystems.disks.' . $libraryDisk . '.region', 'none'),
             'endpointRoot' => $endpointType === 'local' ? '' : $this->config->get('filesystems.disks.' . $libraryDisk . '.root', ''),
-            'accessKey' => $this->config->get('filesystems.disks.' . $libraryDisk . '.key', 'none'),
+            'accessKey' => $accessKey,
+            'sessionToken' => $sessionToken,
             'csrfToken' => $this->sessionStore->token(),
             'acl' => $this->config->get('twill.media_library.acl'),
             'filesizeLimit' => $this->config->get('twill.media_library.filesize_limit'),
