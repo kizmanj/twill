@@ -94,15 +94,15 @@
               },
               request: {
                 endpoint: this.uploaderConfig.endpoint,
-                accessKey: this.uploaderConfig.accessKey,
-                sessionToken: this.uploaderConfig.sessionToken
+                accessKey: this.uploaderConfig.accessKey
               },
               signature: {
                 endpoint: this.uploaderConfig.signatureEndpoint,
                 version: 4,
                 customHeaders: {
                   'X-CSRF-TOKEN': this.uploaderConfig.csrfToken
-                }
+                },
+                sessionToken: this.uploaderConfig.sessionToken
               },
               uploadSuccess: {
                 endpoint: this.uploaderConfig.successEndpoint,
