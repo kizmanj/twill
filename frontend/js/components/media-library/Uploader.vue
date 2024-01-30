@@ -98,6 +98,12 @@
                 accessKey: this.uploaderConfig.accessKey,
                 sessionToken: this.uploaderConfig.sessionToken
               },
+              credentials: {
+                accessKey: this.uploaderConfig.accessKey,
+                secretKey: null,
+                expiration: null,
+                sessionToken: this.uploaderConfig.sessionToken
+              },
               signature: {
                 endpoint: this.uploaderConfig.signatureEndpoint,
                 version: 4,
