@@ -70,7 +70,7 @@ class MediasUploaderConfig
             if (!empty($diskSettingCreds) && is_object($diskSettingCreds) && method_exists($diskSettingCreds, 'getAccessKeyId')) {
                 $accessKey = $diskSettingCreds->getAccessKeyId();
                 $sessionToken = $diskSettingCreds->getSecurityToken();
-                $sessionTokenExpiration = $diskSettingCreds->getSecurityToken();
+                $sessionTokenExpiration = $diskSettingCreds->getExpiration();
             } else if (!empty($diskSettingCreds) && is_array($diskSettingCreds)) {
                 $accessKey = $diskSettingCreds['key'];
                 $sessionToken = $diskSettingCreds['token'];

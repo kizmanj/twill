@@ -98,12 +98,6 @@
                 accessKey: this.uploaderConfig.accessKey,
                 sessionToken: this.uploaderConfig.sessionToken
               },
-              credentials: {
-                accessKey: this.uploaderConfig.accessKey,
-                secretKey: this.uploaderConfig.sessionToken ? "dummy-secret-key" : null, // server side won't share it
-                expiration: this.uploaderConfig.sessionTokenExpiration,
-                sessionToken: this.uploaderConfig.sessionToken
-              },
               signature: {
                 endpoint: this.uploaderConfig.signatureEndpoint,
                 version: 4,
@@ -170,6 +164,13 @@
                 }
               }
             })
+        // Overriding object here, as the uploader was designed to work with a local cred provider, or only a key, but not a hybrid
+        if (this.uploaderConfig.sessionToken) {
+          this._uploader.methods._currentCredentials = {
+            accessKey: this.uploaderConfig.accessKey,
+            sessionToken: this.uploaderConfig.sessionToken
+          }
+        }
       },
       replaceMedia: function (id) {
         this.media_to_replace_id = id
