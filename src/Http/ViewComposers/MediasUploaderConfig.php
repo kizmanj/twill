@@ -6,6 +6,7 @@ use Illuminate\Config\Repository as Config;
 use Illuminate\Contracts\View\View;
 use Illuminate\Routing\UrlGenerator;
 use Illuminate\Session\Store as SessionStore;
+use Aws\CacheInterface;
 
 class MediasUploaderConfig
 {
@@ -65,12 +66,24 @@ class MediasUploaderConfig
         $accessKey = $this->config->get('filesystems.disks.' . $libraryDisk . '.key', 'none');
         $sessionToken = null;
         $sessionTokenExpiration = null;
+        
         if ($endpointType === 's3') {
+            // CacheInterface|array|bool|callable
             $diskSettingCreds = $this->config->get('filesystems.disks.' . $libraryDisk . '.credentials');
+            // it's a memoized credential provider
+            if (!empty($diskSettingCreds) && is_callable($diskSettingCreds)) {
+                $diskSettingCreds = $diskSettingCreds->call();
+            }
+            // it's a cacher object
+            if (!empty($diskSettingCreds) && is_object($diskSettingCreds) && method_exists($diskSettingCreds, 'get')) {
+                $diskSettingCreds = $diskSettingCreds->get('aws_cached_web_identity_credentials');
+            }
+            // it's a credential object
             if (!empty($diskSettingCreds) && is_object($diskSettingCreds) && method_exists($diskSettingCreds, 'getAccessKeyId')) {
                 $accessKey = $diskSettingCreds->getAccessKeyId();
                 $sessionToken = $diskSettingCreds->getSecurityToken();
                 $sessionTokenExpiration = $diskSettingCreds->getExpiration();
+            // it's an array
             } else if (!empty($diskSettingCreds) && is_array($diskSettingCreds)) {
                 $accessKey = $diskSettingCreds['key'];
                 $sessionToken = $diskSettingCreds['token'];
