@@ -26,7 +26,21 @@ class SignS3Upload
         $policyJson = json_encode($policyObject);
 
         $this->bucket = $this->config->get('filesystems.disks.' . $disk . '.bucket');
-        $this->secret = $this->config->get('filesystems.disks.' . $disk . '.secret');
+
+        $diskSettingCreds = $this->config->get('filesystems.disks.' . $disk . '.credentials');
+        if (!empty($diskSettingCreds)) {
+            // it's a memoized credential provider
+            if (!empty($diskSettingCreds) && is_callable($diskSettingCreds)) {
+                $diskSettingCreds = $diskSettingCreds->call();
+            }
+            // it's a cacher object
+            if (!empty($diskSettingCreds) && is_object($diskSettingCreds) && method_exists($diskSettingCreds, 'get')) {
+                $diskSettingCreds = $diskSettingCreds->get('aws_cached_web_identity_credentials');
+            }
+            $this->secret = $diskSettingCreds->getSecretKey();
+        } else {
+            $this->secret = $this->config->get('filesystems.disks.' . $disk . '.secret');
+        }
 
         $signedPolicy = $this->signPolicy($policyJson);
 
