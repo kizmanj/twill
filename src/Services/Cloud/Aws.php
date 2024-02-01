@@ -23,11 +23,13 @@ class Aws
     public function getConfigFor($disk): array
     {
         return [
-            'credentials' => [
+            'credentials' => $this->config($disk, 'credentials', [
                 'key' => $this->config($disk, 'key'),
 
                 'secret' => $this->config($disk, 'secret'),
-            ],
+                
+                'token' => $this->config($disk, 'token')
+            ]),
 
             'region' => $this->config($disk, 'region'),
 
