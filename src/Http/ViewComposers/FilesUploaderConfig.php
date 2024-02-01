@@ -62,6 +62,34 @@ class FilesUploaderConfig
             'azure' => $this->urlGenerator->route(config('twill.admin_route_name_prefix') . 'file-library.sign-azure-upload'),
         ];
 
+        $accessKey = $this->config->get('filesystems.disks.' . $libraryDisk . '.key', 'none');
+        $sessionToken = null;
+        $sessionTokenExpiration = null;
+        
+        if ($endpointType === 's3') {
+            // CacheInterface|array|bool|callable
+            $diskSettingCreds = $this->config->get('filesystems.disks.' . $libraryDisk . '.credentials');
+            // it's a memoized credential provider
+            if (!empty($diskSettingCreds) && is_callable($diskSettingCreds)) {
+                $diskSettingCreds = $diskSettingCreds->call();
+            }
+            // it's a cacher object
+            if (!empty($diskSettingCreds) && is_object($diskSettingCreds) && method_exists($diskSettingCreds, 'get')) {
+                $diskSettingCreds = $diskSettingCreds->get('aws_cached_web_identity_credentials');
+            }
+            // it's a credential object
+            if (!empty($diskSettingCreds) && is_object($diskSettingCreds) && method_exists($diskSettingCreds, 'getAccessKeyId')) {
+                $accessKey = $diskSettingCreds->getAccessKeyId();
+                $sessionToken = $diskSettingCreds->getSecurityToken();
+                $sessionTokenExpiration = $diskSettingCreds->getExpiration();
+            // it's an array
+            } else if (!empty($diskSettingCreds) && is_array($diskSettingCreds)) {
+                $accessKey = $diskSettingCreds['key'];
+                $sessionToken = $diskSettingCreds['token'];
+                $sessionTokenExpiration = $diskSettingCreds['expiration'];
+            }
+        }
+
         $filesUploaderConfig = [
             'endpointType' => $endpointType,
             'endpoint' => $endpointByType[$endpointType](),
@@ -70,7 +98,9 @@ class FilesUploaderConfig
             'endpointBucket' => $this->config->get('filesystems.disks.' . $libraryDisk . '.bucket', 'none'),
             'endpointRegion' => $this->config->get('filesystems.disks.' . $libraryDisk . '.region', 'none'),
             'endpointRoot' => $endpointType === 'local' ? '' : $this->config->get('filesystems.disks.' . $libraryDisk . '.root', ''),
-            'accessKey' => $this->config->get('filesystems.disks.' . $libraryDisk . '.key', 'none'),
+            'accessKey' => $accessKey,
+            'sessionToken' => $sessionToken,
+            'sessionTokenExpiration' => $sessionTokenExpiration,
             'csrfToken' => $this->sessionStore->token(),
             'acl' => $this->config->get('twill.file_library.acl'),
             'filesizeLimit' => $this->config->get('twill.file_library.filesize_limit'),
